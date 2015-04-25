@@ -45,7 +45,7 @@ router.post('/', function(req, res) {
 
         if(!err) {
 
-          res.status(201).json({message: 'message.success.wordCreation'});
+          res.status(201).json({message: 'message.success.wordCreation', data: newWord});
 
         } else {
 
@@ -105,7 +105,7 @@ router.put('/:id', function(req, res) {
 
           if(!err) {
 
-            res.status(200).json({message: 'message.success.wordUpdate'});
+            res.status(200).json({message: 'message.success.wordUpdate', data: newWord});
 
           } else {
 
