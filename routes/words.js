@@ -12,11 +12,11 @@ router.get('/', function(req, res) {
 
     if(!err) {
 
-      res.json(200, docs);
+      res.status(200).json(docs);
 
     } else {
 
-      res.json(500, { message: 'message.error.wordList' });
+      res.status(500).json({ message: 'message.error.wordList' });
 
     }
 
@@ -45,11 +45,11 @@ router.post('/', function(req, res) {
 
         if(!err) {
 
-          res.json(201, {message: 'message.success.wordCreation'});
+          res.status(201).json({message: 'message.success.wordCreation'});
 
         } else {
 
-          res.json(500, {message: 'message.error.wordCreation'});
+          res.status(500).json({message: 'message.error.wordCreation'});
 
         }
 
@@ -57,11 +57,11 @@ router.post('/', function(req, res) {
 
     } else if (!err) {
 
-      res.json(403, { message: 'message.error.wordExists'});
+      res.status(403).json({ message: 'message.error.wordExists'});
 
     } else {
 
-      res.json(500, { message: 'message.error.wordCreation'});
+      res.status(500).json({ message: 'message.error.wordCreation'});
 
     }
   });
@@ -75,15 +75,15 @@ router.get('/:id', function(req, res) {
 
     if(!err && doc) {
 
-      res.json(200, doc);
+      res.status(200).json(doc);
 
     } else if(err) {
 
-      res.json(500, { message: 'message.error.wordOne' + err});
+      res.status(500).json({ message: 'message.error.wordOne' + err});
 
     } else {
 
-      res.json(404, { message: 'message.error.wordOne'});
+      res.status(404).json({ message: 'message.error.wordOne'});
 
     }
   });
