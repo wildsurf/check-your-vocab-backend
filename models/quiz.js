@@ -11,6 +11,8 @@ var wordListSchema = new Schema({
 var quizSchema = new Schema({
     wordList: [ wordListSchema ],
     visibleLanguage: { type: String, enum: ['language1', 'language2', 'mixed'], default: 'mixed' },
+    language1: { type: String, required: true },
+    language2: { type: String, required: true },
     category: { type: String },
     date_completed: { type: Date },
     date_created  : { type: Date, required: true, default: Date.now }

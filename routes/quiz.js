@@ -38,10 +38,15 @@ router.post('/', function(req, res) {
 
   var quiz = new Quiz({
     visibleLanguage: visibleLanguage,
+    language1: quizData.language1,
+    language2: quizData.language2,
     category: category
   });
 
-  Word.find({category: category}, function(err, docs) {
+  Word.find({
+    category: category,
+    language1: quizData.language1,
+    language2: quizData.language2 }, function(err, docs) {
 
     if (!err) {
 
