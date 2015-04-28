@@ -48,7 +48,7 @@ router.post('/', function(req, res) {
     language1: quizData.language1,
     language2: quizData.language2 }, function(err, docs) {
 
-    if (!err) {
+    if (!err && docs.length) {
 
         selectedWords = _.sample(docs, maximumWords);
 
