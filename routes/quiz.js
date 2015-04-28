@@ -25,10 +25,10 @@ router.get('/', function(req, res) {
 
 });
 
-/* Get a newly generated quiz */
-router.get('/generate', function(req, res) {
+/* Create a newly generated quiz */
+router.post('/', function(req, res) {
 
-  var quizData = req.query || {};
+  var quizData = req.body || {};
   var maximumWords = quizData.limit || 100;
   var visibleLanguage = quizData.visibleLanguage || 'mixed';
   var category = quizData.category || new RegExp('.*');
