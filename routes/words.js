@@ -8,7 +8,11 @@ var _ = require('lodash');
 /* GET words listing. */
 router.get('/', function(req, res) {
 
-  Word.find({}, function(err, docs) {
+  if (req.query) {
+    delete req.query.v;
+  }
+
+  Word.find(req.query, function(err, docs) {
 
     if(!err) {
 
