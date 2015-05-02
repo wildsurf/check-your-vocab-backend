@@ -16,6 +16,7 @@ mongoose.connect('mongodb://localhost/check_your_vocab');
 var app = express();
 
 // view engine setup
+app.set('port', (process.env.PORT || 3000));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -69,7 +70,7 @@ app.use(function(err, req, res) {
   });
 });
 
-var server = app.listen(3000, function () {
+var server = app.listen(app.get('port'), function () {
 
   var host = server.address().address;
   var port = server.address().port;
