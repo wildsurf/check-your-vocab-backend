@@ -9,6 +9,7 @@ var wordListSchema = new Schema({
 });
 
 var quizSchema = new Schema({
+    userId: { type: String },
     wordList: [ wordListSchema ],
     visibleLanguage: { type: String, enum: ['language1', 'language2', 'mixed'], default: 'mixed' },
     language1: { type: String, required: true },

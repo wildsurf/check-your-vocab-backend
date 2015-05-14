@@ -7,8 +7,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
-var quiz = require('./routes/quiz');
-var words = require('./routes/words');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var flash = require('connect-flash');
@@ -48,10 +46,10 @@ app.use(flash());
 
 // routes
 app.use('/', routes);
-app.use('/quiz', quiz);
-app.use('/words', words);
 
 require('./routes/users')(app, passport);
+require('./routes/quiz')(app);
+require('./routes/words')(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,122 +1,188 @@
 'use strict';
 
-var express = require('express');
-var router = express.Router();
 var Word = require('../models/words').Word;
 var _ = require('lodash');
 
-/* GET words listing. */
-router.get('/', function(req, res) {
+// route middleware to make sure a user is logged in
+function isLoggedIn(req, res, next) {
 
-  if (req.query) {
-    delete req.query.v;
-  }
+    // if user is authenticated in the session, carry on
+    if (req.isAuthenticated()) {
 
-  Word.find(req.query, function(err, docs) {
-
-    if(!err) {
-
-      res.status(200).json(docs);
+        return next();
 
     } else {
 
-      res.status(500).json({ message: 'message.error.wordList' });
+      res.status(401).json({ message: 'message.error.unauthorised' });
 
     }
 
-  });
+}
 
-});
+module.exports = function(app) {
 
-/* POST words */
-router.post('/', function(req, res) {
+  /* GET words listing. */
+  app.get('/words', isLoggedIn, function(req, res) {
 
-  var wordData = req.body;
-  wordData.score = 0;
+    var user = req.user;
 
-  Word.findOne({
-
-        translation1: wordData.translation1,
-        translation2: wordData.translation2
-
-    }, function(err, doc) {
-
-    if(!err && !doc) {
-
-      var newWord = new Word(wordData);
-
-      newWord.save(function(err) {
-
-        if(!err) {
-
-          res.status(201).json(newWord);
-
-        } else {
-
-          res.status(500).json({message: 'message.error.wordCreation'});
-
-        }
-
-      });
-
-    } else if (!err) {
-
-      res.status(403).json({ message: 'message.error.wordExists'});
-
-    } else {
-
-      res.status(500).json({ message: 'message.error.wordCreation'});
-
+    if (req.query) {
+      delete req.query.v;
+      req.query.userId = user._id;
     }
-  });
-});
 
-router.get('/:id', function(req, res) {
+    Word.find(req.query, function(err, docs) {
 
-  var id = req.params.id;
+      if(!err) {
 
-  Word.findById(id, function(err, doc) {
+        res.status(200).json(docs);
 
-    if(!err && doc) {
+      } else {
 
-      res.status(200).json(doc);
+        res.status(500).json({ message: 'message.error.wordList' });
 
-    } else if(err) {
+      }
 
-      res.status(500).json({ message: 'message.error.wordOne' + err});
+    });
 
-    } else {
-
-      res.status(404).json({ message: 'message.error.wordOne'});
-
-    }
   });
 
-});
+  /* POST words */
+  app.post('/words', isLoggedIn, function(req, res) {
 
-router.put('/:id', function(req, res) {
+    var wordData = req.body;
+    var user = req.user;
+    wordData.score = 0;
 
-  var _id = req.params.id;
-  var wordData = req.body;
+    Word.findOne({
 
-  Word.findById(_id, function(err, doc) {
+          userId: user._id,
+          translation1: wordData.translation1,
+          translation2: wordData.translation2
 
-      if(!err && doc) {
+      }, function(err, doc) {
 
-        var newWord = _.merge(doc, wordData);
+      if(!err && !doc) {
+
+        var newWord = new Word(wordData);
+        newWord.userId = user._id;
 
         newWord.save(function(err) {
 
           if(!err) {
 
-            res.status(200).json(newWord);
+            res.status(201).json(newWord);
 
           } else {
 
-            res.status(500).json({message: 'message.error.wordUpdate' + err});
+            res.status(500).json({message: 'message.error.wordCreation' + err});
 
           }
+
         });
+
+      } else if (!err) {
+
+        res.status(403).json({ message: 'message.error.wordExists'});
+
+      } else {
+
+        res.status(500).json({ message: 'message.error.wordCreation'});
+
+      }
+    });
+  });
+
+  app.get('/words/:id', isLoggedIn, function(req, res) {
+
+    var id = req.params.id;
+    var user = req.user;
+
+    Word.findById(id, function(err, doc) {
+
+      if(!err && doc) {
+
+        if (user._id !== doc._id) {
+
+          res.status(401).json({ message: 'message.error.unauthorised' });
+
+        }
+
+        res.status(200).json(doc);
+
+      } else if(err) {
+
+        res.status(500).json({ message: 'message.error.wordOne' + err});
+
+      } else {
+
+        res.status(404).json({ message: 'message.error.wordOne'});
+
+      }
+    });
+
+  });
+
+  app.put('/words/:id', isLoggedIn, function(req, res) {
+
+    var _id = req.params.id;
+    var wordData = req.body;
+    var user = req.user;
+
+    Word.findById(_id, function(err, doc) {
+
+        if(!err && doc) {
+
+          if (user._id !== doc._id) {
+
+            res.status(401).json({ message: 'message.error.unauthorised' });
+
+          }
+
+          var newWord = _.merge(doc, wordData);
+
+          newWord.save(function(err) {
+
+            if(!err) {
+
+              res.status(200).json(newWord);
+
+            } else {
+
+              res.status(500).json({message: 'message.error.wordUpdate' + err});
+
+            }
+          });
+
+        } else if(!err) {
+
+          res.status(404).json({ message: 'message.error.wordOne'});
+
+        } else {
+
+          res.status(500).json({ message: 'message.error.wordUpdate'});
+
+        }
+      });
+  });
+
+  app.delete('/words/:id', isLoggedIn, function(req, res) {
+
+    var _id = req.params.id;
+    var user = req.user;
+
+    Word.findById(_id, function(err, doc) {
+
+      if(!err && doc) {
+
+        if (user._id !== doc._id) {
+
+          res.status(401).json({ message: 'message.error.unauthorised' });
+
+        }
+
+        doc.remove();
+        res.status(200).json({});
 
       } else if(!err) {
 
@@ -124,34 +190,10 @@ router.put('/:id', function(req, res) {
 
       } else {
 
-        res.status(500).json({ message: 'message.error.wordUpdate'});
+        res.status(403).json({message: 'message.error.wordDelete' + err });
 
       }
     });
-});
 
-router.delete('/:id', function(req, res) {
-
-  var _id = req.params.id;
-
-  Word.findById(_id, function(err, doc) {
-
-    if(!err && doc) {
-
-      doc.remove();
-      res.status(200).json({});
-
-    } else if(!err) {
-
-      res.status(404).json({ message: 'message.error.wordOne'});
-
-    } else {
-
-      res.status(403).json({message: 'message.error.wordDelete' + err });
-
-    }
   });
-
-});
-
-module.exports = router;
+};

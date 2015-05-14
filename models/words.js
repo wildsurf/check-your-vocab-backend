@@ -3,6 +3,7 @@
 var mongoose = require('mongoose'), Schema = mongoose.Schema;
 
 var wordsSchema = new Schema({
+    userId: { type: String },
     language1: { type: String, required: true },
     language2: { type: String, required: true },
     score: { type: Number },
