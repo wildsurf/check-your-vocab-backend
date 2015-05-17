@@ -33,7 +33,6 @@
     "cookie-parser": "~1.0.0",
     "method-override": "~1.0.0",
     "express-session": "~1.0.0",
-    "cors": "2.5.3",
     "debug": "~2.1.1",
     "express": "~4.12.2",
     "ejs" : "~0.8.5",

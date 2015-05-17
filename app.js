@@ -22,12 +22,17 @@ app.set('port', (process.env.PORT || 3000));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-var cors = require('cors');
-var corsOptions = {
-    origin:         '*',
-    methods:        ['GET', 'PUT', 'POST', 'DELETE']
-};
-app.use(cors(corsOptions));
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+  if ('OPTIONS' === req.method) {
+     res.send(200);
+  } else {
+     next();
+  }
+});
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
