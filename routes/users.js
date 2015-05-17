@@ -36,10 +36,16 @@ module.exports = function(app, passport) {
 
     // process the login form
     app.post('/login', passport.authenticate('local-login', {
-        successRedirect : '/profile', // redirect to the secure profile section
         failureRedirect : '/login', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
-    }));
+    }), function(req, res) {
+        res.status(200).json({
+            session: {
+                id: req.user._id,
+                username: req.user.local.email
+            }
+        });
+    });
 
     // =====================================
     // FACEBOOK ROUTES =====================
@@ -50,9 +56,16 @@ module.exports = function(app, passport) {
     // handle the callback after facebook has authenticated the user
     app.get('/auth/facebook/callback',
         passport.authenticate('facebook', {
-            successRedirect : '/profile',
             failureRedirect : '/'
-        }));
+        }), function(req, res) {
+            res.status(200).json({
+                session: {
+                    id: req.user._id,
+                    username: req.user.facebook.name,
+                    imageURL: 'http://graph.facebook.com/' + req.user.facebook.id + '/picture?type=square'
+                }
+            });
+        });
 
     // =====================================
     // TWITTER ROUTES =====================
@@ -63,9 +76,17 @@ module.exports = function(app, passport) {
     // handle the callback after twitter has authenticated the user
     app.get('/auth/twitter/callback',
         passport.authenticate('twitter', {
-            successRedirect : '/profile',
             failureRedirect : '/'
-        }));
+        }), function(req, res) {
+            res.status(200).json({
+                session: {
+                    id: req.user._id,
+                    username: req.user.twitter.displayName,
+                    imageURL: 'https://twitter.com/' + req.user.twitter.username + '/profile_image'
+                }
+            });
+        });
+
 
     // =====================================
     // SIGNUP ==============================
