@@ -189,9 +189,10 @@ module.exports = function(app) {
             return;
           }
 
-          doc.wordList[wordId] = wordStatus;
+          Quiz.update(
+            { _id: _id, 'wordList.wordId': wordId },
+            { $set: { 'wordList.$.status' : wordStatus } }, function(err) {
 
-          doc.save(function(err) {
 
             if(!err) {
 
