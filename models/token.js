@@ -7,7 +7,7 @@ var tokenSchema = new Schema({
     token: { type: String, unique: true, default: function() {
         return uid(666);
     }},
-    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
     scope: [ { type: String }],
     expires: { type: Date , default: function() {
         var today = new Date();

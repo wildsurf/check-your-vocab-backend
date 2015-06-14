@@ -48,14 +48,15 @@ module.exports = function(app, passport) {
             });
 
             var token = new Token({
-                userId: req.user._id
+                user: req.user._id
             });
 
             token.save(function() {
                 res.status(200).json({
                     session: {
                         id: req.user._id,
-                        username: req.user.local.email
+                        username: req.user.local.email,
+                        token: token.token
                     }
                 });
             });
@@ -132,7 +133,7 @@ module.exports = function(app, passport) {
     // =====================================
     // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
-    app.get('/profile', isLoggedIn, function(req, res) {
+    app.get('/profile', passport.authenticate('bearer', { session: false }), function(req, res) {
         res.render('profile.ejs', {
             user : req.user // get the user out of session and pass to template
         });
