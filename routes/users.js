@@ -1,6 +1,7 @@
 'use strict';
 
 var Token = require('../models/token').Token;
+var session = {};
 
 // app/routes.js
 module.exports = function(app, passport) {
@@ -54,7 +55,11 @@ module.exports = function(app, passport) {
     // FACEBOOK ROUTES =====================
     // =====================================
     // route for facebook authentication and login
-    app.get('/auth/facebook', passport.authenticate('facebook', {
+    app.get('/auth/facebook', function(req, res, next) {
+        console.log(req.query);
+        session.returnTo = req.query.callbackUrl;
+        next();
+    }, passport.authenticate('facebook', {
         scope : 'email',
         session: false
     }));
@@ -65,12 +70,21 @@ module.exports = function(app, passport) {
             failureRedirect : '/',
             session: false
         }), function(req, res) {
-            res.status(200).json({
-                session: {
-                    id: req.user._id,
-                    username: req.user.facebook.name,
-                    imageURL: 'http://graph.facebook.com/' + req.user.facebook.id + '/picture?type=square'
-                }
+
+            Token.find({userId: req.user._id}, function(err, docs) {
+
+                docs.forEach(function(doc) {
+                    doc.remove();
+                });
+
+                var token = new Token({
+                    user: req.user._id
+                });
+
+                token.save(function() {
+                    res.redirect(session.returnTo  + '?access_token=' + token.token);
+                });
+
             });
         });
 
