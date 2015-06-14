@@ -4,6 +4,10 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
+var cors = require('cors');
+var corsOptions = {
+  origin: 'http://localhost:4200'
+};
 
 var routes = require('./routes/index');
 var mongoose = require('mongoose');
@@ -18,18 +22,7 @@ var app = express();
 app.set('port', (process.env.PORT || 3000));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
-  if ('OPTIONS' === req.method) {
-     res.send(200);
-  } else {
-     next();
-  }
-});
+app.use(cors(corsOptions));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
