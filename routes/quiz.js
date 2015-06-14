@@ -104,7 +104,7 @@ module.exports = function(app) {
 
       if(!err && doc) {
 
-        if (user._id === doc.userId) {
+        if (user._id.equals(doc.userId)) {
 
           res.status(200).json(doc);
 
@@ -138,9 +138,10 @@ module.exports = function(app) {
 
         if(!err && doc) {
 
-          if (user._id !== doc._id) {
+          if (!user._id.equals(doc.userId)) {
 
             res.status(401).json({ message: 'message.error.unauthorised' });
+            return;
 
           }
 
@@ -178,19 +179,30 @@ module.exports = function(app) {
     var wordStatus = req.body.wordStatus;
     var user = req.user;
 
-    Quiz.update(
-      { _id: _id, 'wordList.wordId': wordId },
-      { $set: { 'wordList.$.status' : wordStatus } }, function(err, doc) {
+    Quiz.findById(_id, function(err, doc) {
 
         if(!err && doc) {
 
-          if (user._id !== doc._id) {
+          if (!user._id.equals(doc.userId)) {
 
             res.status(401).json({ message: 'message.error.unauthorised' });
-
+            return;
           }
 
-          res.status(200).json({});
+          doc.wordList[wordId] = wordStatus;
+
+          doc.save(function(err) {
+
+            if(!err) {
+
+                res.status(201).json({});
+
+            } else {
+
+                res.status(500).json({message: 'message.error.quizGenerate'});
+            }
+
+          });
 
         } else if(!err) {
 
@@ -201,6 +213,7 @@ module.exports = function(app) {
           res.status(403).json({message: 'message.error.updateWordInQuiz' + err });
 
         }
+
     });
 
   });
@@ -214,9 +227,10 @@ module.exports = function(app) {
 
       if(!err && doc) {
 
-        if (user._id !== doc._id) {
+        if (!user._id.equals(doc.userId)) {
 
           res.status(401).json({ message: 'message.error.unauthorised' });
+          return;
 
         }
 

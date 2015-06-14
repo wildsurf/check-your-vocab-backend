@@ -9,7 +9,7 @@ var wordsSchema = new Schema({
     score: { type: Number },
     translation1: { type: String, required: true },
     translation2: { type: String, required: true },
-    category: { type: String },
+    category: { type: String, default: 'general' },
     date_created  : { type: Date, required: true, default: Date.now }
 });
 
