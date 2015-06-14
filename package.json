@@ -8,6 +8,7 @@
   "devDependencies": {
     "chai": "2.1.0",
     "co-mocha": "1.1.0",
+    "crypto": "0.0.3",
     "grunt-contrib-jshint": "0.11.0",
     "grunt-contrib-watch": "0.6.1",
     "grunt-nodemon": "0.4.0",
@@ -17,7 +18,8 @@
     "mocha-sinon": "1.1.4",
     "passport-http-bearer": "^1.0.1",
     "sinon": "1.12.2",
-    "sinon-chai": "2.7.0"
+    "sinon-chai": "2.7.0",
+    "uid2": "0.0.3"
   },
   "engines": {
     "node": "0.11.14"

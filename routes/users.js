@@ -1,5 +1,7 @@
 'use strict';
 
+var Token = require('../models/token').Token;
+
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
 
@@ -31,19 +33,33 @@ module.exports = function(app, passport) {
     app.get('/login', function(req, res) {
 
         // render the page and pass in any flash data if it exists
-        res.render('login.ejs', { message: req.flash('loginMessage') });
+        res.render('login.ejs');
     });
 
     // process the login form
     app.post('/login', passport.authenticate('local-login', {
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
+        session: false
     }), function(req, res) {
-        res.status(200).json({
-            session: {
-                id: req.user._id,
-                username: req.user.local.email
-            }
+
+        Token.find({userId: req.user._id}, function(err, docs) {
+
+            docs.forEach(function(doc) {
+                doc.remove();
+            });
+
+            var token = new Token({
+                userId: req.user._id
+            });
+
+            token.save(function() {
+                res.status(200).json({
+                    session: {
+                        id: req.user._id,
+                        username: req.user.local.email
+                    }
+                });
+            });
+
         });
     });
 
@@ -51,12 +67,16 @@ module.exports = function(app, passport) {
     // FACEBOOK ROUTES =====================
     // =====================================
     // route for facebook authentication and login
-    app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
+    app.get('/auth/facebook', passport.authenticate('facebook', {
+        scope : 'email',
+        session: false
+    }));
 
     // handle the callback after facebook has authenticated the user
     app.get('/auth/facebook/callback',
         passport.authenticate('facebook', {
-            failureRedirect : '/'
+            failureRedirect : '/',
+            session: false
         }), function(req, res) {
             res.status(200).json({
                 session: {
@@ -76,7 +96,8 @@ module.exports = function(app, passport) {
     // handle the callback after twitter has authenticated the user
     app.get('/auth/twitter/callback',
         passport.authenticate('twitter', {
-            failureRedirect : '/'
+            failureRedirect : '/',
+            session: false
         }), function(req, res) {
             res.status(200).json({
                 session: {
@@ -103,9 +124,7 @@ module.exports = function(app, passport) {
 
     // process the signup form
     app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/signup', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
+        session: false
     }));
 
     // =====================================

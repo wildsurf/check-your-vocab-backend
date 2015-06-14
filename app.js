@@ -9,8 +9,6 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var flash = require('connect-flash');
-var session = require('express-session');
 var configDB = require('./config/database');
 
 mongoose.connect(configDB.url);
@@ -44,10 +42,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // passport
 require('./config/passport')(passport);
-app.use(session({ secret: 'alrededor' }));
 app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());
 
 // routes
 app.use('/', routes);

@@ -4,31 +4,36 @@
 var LocalStrategy   = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
+var BearerStrategy  = require('passport-http-bearer').Strategy;
 var configAuth = require('./auth');
 
 // load up the user model
-var User            = require('../models/user');
+var User = require('../models/user');
+var Token = require('../models/token');
 
 // expose this function to our app using module.exports
 module.exports = function(passport) {
 
     // =========================================================================
-    // passport session setup ==================================================
+    // passport auth token setup ==================================================
     // =========================================================================
-    // required for persistent login sessions
-    // passport needs ability to serialize and unserialize users out of session
 
-    // used to serialize the user for the session
-    passport.serializeUser(function(user, done) {
-        done(null, user._id);
-    });
-
-    // used to deserialize the user
-    passport.deserializeUser(function(id, done) {
-        User.findById(id, function(err, user) {
-            done(err, user);
-        });
-    });
+    passport.use('bearer', new BearerStrategy(
+        function(token, done) {
+            Token
+                .findOne({ token: token })
+                .populate('user')
+                .exec(function(error, token) {
+                    if (token && token.active && token.user) {
+                        done(null, token.user, { scope: token.scope });
+                    } else if (!error) {
+                        done(null, false);
+                    } else {
+                        done(error);
+                    }
+                });
+        }
+    ));
 
     // =========================================================================
     // LOCAL SIGNUP ============================================================
@@ -57,7 +62,7 @@ module.exports = function(passport) {
             // check to see if theres already a user with that email
             if (user) {
 
-                return done(null, false, req.flash('signupMessage', 'message.error.emailTaken'));
+                return done(null, false, 'message.error.emailTaken');
 
             } else {
 
@@ -112,14 +117,14 @@ module.exports = function(passport) {
             // if no user is found, return the message
             if (!user) {
 
-                return done(null, false, req.flash('loginMessage', 'message.error.noSuchUser')); // req.flash is the way to set flashdata using connect-flash
+                return done(null, false, 'message.error.noSuchUser'); // req.flash is the way to set flashdata using connect-flash
 
             }
 
             // if the user is found but the password is wrong
             if (!user.validPassword(password)) {
 
-                return done(null, false, req.flash('loginMessage', 'message.error.wrongPass')); // create the loginMessage and save it to session as flashdata
+                return done(null, false, 'message.error.wrongPass'); // create the loginMessage and save it to session as flashdata
 
             }
 
