@@ -3,22 +3,9 @@
 var Quiz = require('../models/quiz').Quiz;
 var Word = require('../models/words').Word;
 var _ = require('lodash');
+var passport = require('passport');
 
-// route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
-
-    // if user is authenticated in the session, carry on
-    if (req.isAuthenticated()) {
-
-        return next();
-
-    } else {
-
-      res.status(401).json({ message: 'message.error.unauthorised' });
-
-    }
-
-}
+var isLoggedIn = passport.authenticate('bearer', { session: false });
 
 module.exports = function(app) {
 

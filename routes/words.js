@@ -2,22 +2,9 @@
 
 var Word = require('../models/words').Word;
 var _ = require('lodash');
+var passport = require('passport');
 
-// route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
-
-    // if user is authenticated in the session, carry on
-    if (req.isAuthenticated()) {
-
-        return next();
-
-    } else {
-
-      res.status(401).json({ message: 'message.error.unauthorised' });
-
-    }
-
-}
+var isLoggedIn = passport.authenticate('bearer', { session: false });
 
 module.exports = function(app) {
 
@@ -28,8 +15,9 @@ module.exports = function(app) {
 
     if (req.query) {
       delete req.query.v;
-      req.query.userId = user._id;
     }
+
+    req.query.userId = user._id;
 
     Word.find(req.query, function(err, docs) {
 
@@ -102,13 +90,15 @@ module.exports = function(app) {
 
       if(!err && doc) {
 
-        if (user._id !== doc._id) {
+        if (!user._id.equals(doc.userId)) {
 
           res.status(401).json({ message: 'message.error.unauthorised' });
 
-        }
+        } else {
 
-        res.status(200).json(doc);
+          res.status(200).json(doc);
+
+        }
 
       } else if(err) {
 
@@ -133,26 +123,28 @@ module.exports = function(app) {
 
         if(!err && doc) {
 
-          if (user._id !== doc._id) {
+          if (!user._id.equals(doc.userId)) {
 
             res.status(401).json({ message: 'message.error.unauthorised' });
 
+          } else {
+
+            var newWord = _.merge(doc, wordData);
+
+            newWord.save(function(err) {
+
+              if(!err) {
+
+                res.status(200).json(newWord);
+
+              } else {
+
+                res.status(500).json({message: 'message.error.wordUpdate' + err});
+
+              }
+            });
+
           }
-
-          var newWord = _.merge(doc, wordData);
-
-          newWord.save(function(err) {
-
-            if(!err) {
-
-              res.status(200).json(newWord);
-
-            } else {
-
-              res.status(500).json({message: 'message.error.wordUpdate' + err});
-
-            }
-          });
 
         } else if(!err) {
 
@@ -175,14 +167,16 @@ module.exports = function(app) {
 
       if(!err && doc) {
 
-        if (user._id !== doc._id) {
+        if (!user._id.equals(doc.userId)) {
 
           res.status(401).json({ message: 'message.error.unauthorised' });
 
-        }
+        } else {
 
-        doc.remove();
-        res.status(200).json({});
+          doc.remove();
+          res.status(200).json({});
+
+        }
 
       } else if(!err) {
 
